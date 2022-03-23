@@ -4,6 +4,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class TCPClient {
@@ -17,10 +18,12 @@ public class TCPClient {
 
 		//Load IP addresses from config.yml file
 		Yaml yaml = new Yaml();	//Create a new YAML instance
-		Map<String, Object> config = yaml.load(new FileReader("config.yml")); //load config as yaml
+		Map<String, Object> config = yaml.load(new FileReader("config-client.yml")); //load config as yaml
 		String routerName = (String)config.get("router-ip"); //ServerRouter host name
-		int sockNum = (int)config.get("router-port"); //port number
-		String destination = (String)config.get("destination"); //destination IP (Client)
+		int sockNum = (int)config.get("router-port"); //router port number
+		int serverPort = (int)config.get("server-port"); //server port number
+		String name = (String)config.get("name"); //my name
+		String destination = (String)config.get("destination"); //destination name
 
 		//Tries to connect to the ServerRouter
 		try {
@@ -35,49 +38,81 @@ public class TCPClient {
 			System.exit(1);
 		}
 
-		//Loads file.txt
-		BufferedReader fromFile = new BufferedReader(new FileReader("file.txt")); //reader for the string file
-
 		//Variables for message passing
-		String fromServer; //messages received from router
 		String fromUser; //messages sent to ServerRouter
-		long t0, t1; //timer variables
-		double t;
 
 		//Communication process (initial sends/receives)
-		out.println(destination); //initial send (IP of the destination Server)
-		fromServer = in.readLine(); //initial receive from router (verification of connection)
+		out.println(destination); //clients send the name of the destination server
+		String fromServer = in.readLine(); //initial receive from router (verification of connection)
 		System.out.println("ServerRouter: " + fromServer);
-		out.println(host); //client sends the IP of its machine as initial send
-		t0 = System.nanoTime();
+		out.println(name); //initial send (name of the client)
+		out.println(host); //clients send the IP of its machine
+		String destinationIP = in.readLine();
+		System.out.println("Destination IP: "+destinationIP);
+		socket.close();
+		out.close();
+		in.close();
 
-		//Communication while loop
-		double totalTime = 0;
-		long totalSize = 0;
-		int numCycles = 0;
-		while((fromServer = in.readLine()) != null) {
+		//Connect direct to server
+		try {
+			socket = new Socket(destinationIP, serverPort);
+			System.out.println("Connected to "+destinationIP+":"+serverPort+"!");
+			out = new PrintWriter(socket.getOutputStream(), true);
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		} catch (UnknownHostException e) {
+			System.err.println("Don't know about server: " + destinationIP);
+			System.exit(1);
+		} catch (IOException e) {
+			System.err.println("Couldn't get I/O for the connection to: " + destinationIP);
+			System.exit(1);
+		}
+
+		//Loads file.txt
+		BufferedReader fromFile = new BufferedReader(new FileReader("file.txt")); //reader for the string file
+		String message = "";
+		String line;
+		while((line = fromFile.readLine()) != null) {
+			message += line;
+		}
+		//message = message.substring(0, message.length()-2);
+
+
+		/*while((fromServer = in.readLine()) != null) {
 			//Receives responses from server
 			System.out.println("Server: " + fromServer);
 			t1 = System.nanoTime();
 			if(fromServer.equals("Bye.")) break; //exit statement
 			t = (t1 - t0)/1000000.0; //calculates cycle time between messages
-			totalTime += t;
-			numCycles++;
 
 
 			//Send messages from files to server
-			fromUser = fromFile.readLine(); //reading strings from a file
+			//fromUser = fromFile.readLine(); //reading strings from a file
+			fromUser = message;
 			int size = 0;
 			if(fromUser != null) {
-				size = fromUser.length();
+				size = fromUser.getBytes(StandardCharsets.UTF_8).length;
 				System.out.println("Client: "+fromUser);
 				out.println(fromUser); //sending the strings to the Server via ServerRouter
+				System.out.println("Client: Bye.");
+				out.println("Bye.");
 				t0 = System.nanoTime();
 			}
-			totalSize += size;
-			System.out.println("Message size: "+size+" (avg: "+(totalSize/(double)numCycles)+") bytes");
-			System.out.println("Cycle Time: "+t+" (avg: "+(totalTime/(double)numCycles)+") ms");
-		}
+			System.out.println("Message size: "+size+" bytes");
+			System.out.println("Cycle Time: "+t+" ms");
+		}*/
+
+		long t0 = System.nanoTime();
+		int size = message.getBytes(StandardCharsets.UTF_8).length;
+		System.out.println("Client: "+message);
+		out.println(message); //sending the strings to the Server via ServerRouter
+
+		//Receives responses from server
+		fromServer = in.readLine();
+		System.out.println("Server: " + fromServer);
+		long t1 = System.nanoTime();
+		double t = (t1 - t0)/1000000.0; //calculates cycle time between messages
+		System.out.println("Message size: "+size+" bytes");
+		System.out.println("Cycle Time: "+t+" ms");
 
 		//Closing connections
 		out.close();

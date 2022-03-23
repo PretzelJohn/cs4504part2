@@ -17,10 +17,12 @@ public class TCPServer {
 
         //Load IP addresses from config.yml file
         Yaml yaml = new Yaml();	//Create a new YAML instance
-        Map<String, Object> config = yaml.load(new FileReader("config.yml")); //load config as yaml
+        Map<String, Object> config = yaml.load(new FileReader("config-server.yml")); //load config as yaml
         String routerName = (String)config.get("router-ip"); //ServerRouter host name
-        int sockNum = (int)config.get("router-port"); //port number
-        String destination = (String)config.get("destination"); //destination IP (Client)
+        int sockNum = (int)config.get("router-port"); //router port number
+        int serverPort = (int)config.get("server-port"); //server port number
+        String name = (String)config.get("name"); //my name
+        String destination = (String)config.get("destination"); //destination name
 
 		//Tries to connect to the ServerRouter
         try {
@@ -35,24 +37,46 @@ public class TCPServer {
             System.exit(1);
         }
 
-      	//Variables for message passing
-        String fromServer; //messages sent to ServerRouter
-        String fromClient; //messages received from ServerRouter
 
 		//Communication process (initial sends/receives)
-		out.println(destination); //initial send (IP of the destination Client)
-		fromClient = in.readLine(); //initial receive from router (verification of connection)
-		System.out.println("ServerRouter: " + fromClient);
+		out.println(destination); //initial send (name of the destination Client)
+		String fromClient = in.readLine(); //initial receive from router (verification of connection)
+        System.out.println("ServerRouter: " + fromClient);
+        out.println(name);
+        out.println(host);
+        String destinationIP = in.readLine();
+        System.out.println("Destination IP: "+destinationIP);
+        socket.close();
+        out.close();
+        in.close();
+
+        ServerSocket serverSocket = new ServerSocket(serverPort);
+        socket = serverSocket.accept();
+        System.out.println("Connected to "+destinationIP+":"+serverPort+"!");
+        out = new PrintWriter(socket.getOutputStream(), true);
+        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        //out.println("Sup?");
 
 		//Communication while loop
-      	while((fromClient = in.readLine()) != null) {
+        String fromServer; //messages sent to ServerRouter
+      	/*while((fromClient = in.readLine()) != null) {
             System.out.println("Client said: " + fromClient);
-            if(fromClient.equals("Bye.")) break; //exit statement
+            if(fromClient.equals("Bye.")) {
+                out.println("Bye.");
+                break; //exit statement
+            }
 
 			fromServer = fromClient.toUpperCase(); //converting received message to upper case
 			System.out.println("Server said: " + fromServer);
             out.println(fromServer); //sending the converted message back to the Client via ServerRouter
-        }
+        }*/
+
+        fromClient = in.readLine();
+        System.out.println("Client said: " + fromClient);
+
+        fromServer = fromClient.toUpperCase(); //converting received message to upper case
+        System.out.println("Server said: " + fromServer);
+        out.println(fromServer); //sending the converted message back to the Client via ServerRouter
 
         //Closing connections
         out.close();
