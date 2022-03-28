@@ -6,7 +6,7 @@
 
     <groupId>src</groupId>
     <artifactId>ProjectPart2</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -38,33 +38,14 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>main.java.TCPClient</mainClass>
+                                    <mainClass>main.java.TCPPeer</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
                             <appendAssemblyId>false</appendAssemblyId>
-                            <finalName>Client</finalName>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>build-server</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <archive>
-                                <manifest>
-                                    <mainClass>main.java.TCPServer</mainClass>
-                                </manifest>
-                            </archive>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <finalName>Server</finalName>
+                            <finalName>Peer</finalName>
                         </configuration>
                     </execution>
                     <execution>
