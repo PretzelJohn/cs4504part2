@@ -85,7 +85,7 @@ On each computer that will act as a router, do the following:
             <li><code>name</code> to an appropriate name for <u>Peer #2</u></li>
         </ol>
     </li>
-    <li>Run the command <code>java -jar Peer.jar 2</code> in command prompt or terminal</li>
+    <li>Run the command <code>java -jar Peer.jar 2 &lt;file&gt;</code> in command prompt or terminal, replacing <code>&lt;file&gt;</code> with the name of a text file (like <code>file.txt</code>)</li>
 </ol>
 
 <h2>Output</h2>

@@ -28,7 +28,7 @@ public class TCPPeer {
 		} else {
 			//SENDER MODE
 			//Load message from file.txt
-			BufferedReader fromFile = new BufferedReader(new FileReader("file.txt"));
+			BufferedReader fromFile = new BufferedReader(new FileReader(args[1]));
 			String message = ""; //the message
 			String line;
 			while((line = fromFile.readLine()) != null) {

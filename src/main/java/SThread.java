@@ -10,8 +10,8 @@ public class SThread extends Thread {
 	private final String destination; //communication strings
 
 	//Constructor
-	SThread(HashMap<String, String> table, Connection toPeer, Connection toRouter, int index, String mode) {
-		this.rTable = table;
+	SThread(HashMap<String, String> rTable, Connection toPeer, Connection toRouter, int index, String mode) {
+		this.rTable = rTable;
 		this.toPeer = toPeer;
 		this.toRouter = toRouter;
 		this.prefix = "#"+index+". ";
@@ -51,7 +51,7 @@ public class SThread extends Thread {
 
 		//Search routing table for destination IP
 		long t0 = System.nanoTime(); //start timer
-		String ip = rTable.get(destinationName); //gets the destination IP address from the table
+		String ip = rTable.get(destinationName);
 		long t = System.nanoTime() - t0; //end timer
 		System.out.printf("%sRouting lookup took %d ns\n", prefix, t); //print routing time
 
